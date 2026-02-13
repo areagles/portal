@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>فواتيري | Arab Eagles</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="js/layout.js"></script>
+
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --panel-bg: #101010;
+            --gold: #d4af37;
+            --gold-gradient: linear-gradient(135deg, #d4af37 0%, #aa8e2f 100%);
+            --border: rgba(212, 175, 55, 0.2);
+            --danger: #e74c3c;
+            --success: #27ae60;
+        }
+
+        .page-container {
+            padding: 20px;
+            padding-bottom: 100px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* --- 1. كارت ملخص الفواتير (The Invoices Summary Card) --- */
+        .summary-card {
+            background: linear-gradient(160deg, #181818 0%, #080808 100%);
+            border-radius: 20px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .summary-card::after {
+            content: ''; position: absolute; top: -50%; left: -50%;
+            width: 200px; height: 200px; background: var(--gold);
+            opacity: 0.05; filter: blur(60px); border-radius: 50%; pointer-events: none;
+        }
+
+        .summary-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;
+        }
+        .summary-title { color: var(--gold); font-weight: 700; font-size: 1rem; }
+        
+        .summary-stats {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; text-align: center;
+        }
+        .stat-box { position: relative; }
+        .stat-box:not(:last-child)::after {
+            content: ''; position: absolute; left: 0; top: 10%; height: 80%;
+            width: 1px; background: rgba(255,255,255,0.1);
+        }
+        .stat-val { display: block; font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 3px; }
+        .stat-lbl { font-size: 0.7rem; color: #888; }
+        
+        /* تلوين الأرقام */
+        .val-total { color: #fff; }
+        .val-paid { color: var(--success); }
+        .val-due { color: var(--danger); text-shadow: 0 0 10px rgba(231, 76, 60, 0.3); }
+
+        /* --- 2. قائمة الفواتير --- */
+        .invoices-list { display: flex; flex-direction: column; gap: 12px; }
+        
+        .invoice-item {
+            background: var(--panel-bg);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            transition: transform 0.2s, border-color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .invoice-item:active { transform: scale(0.98); }
+        .invoice-item.unpaid { border-left: 3px solid var(--danger); }
+        .invoice-item.paid { border-left: 3px solid var(--success); }
+        .invoice-item.partially { border-left: 3px solid var(--gold); }
+
+        .inv-top { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .inv-id { font-family: 'Courier New', monospace; font-weight: bold; color: #888; font-size: 0.85rem; }
+        .inv-date { font-size: 0.75rem; color: #666; }
+
+        .inv-middle { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .inv-title { font-size: 0.95rem; font-weight: 700; color: #fff; }
+        .inv-amount { font-size: 1.1rem; font-weight: 800; color: var(--gold); }
+
+        .inv-bottom { 
+            display: flex; justify-content: space-between; align-items: center; 
+            background: rgba(255,255,255,0.02); padding: 8px; border-radius: 8px;
+        }
+        .inv-status-badge {
+            font-size: 0.7rem; padding: 4px 10px; border-radius: 4px; font-weight: bold;
+        }
+        .st-paid { background: rgba(39, 174, 96, 0.15); color: #2ecc71; }
+        .st-unpaid { background: rgba(231, 76, 60, 0.15); color: #e74c3c; }
+        .st-part { background: rgba(212, 175, 55, 0.15); color: var(--gold); }
+
+        .inv-remain { font-size: 0.8rem; color: #aaa; }
+        .inv-remain span { color: #fff; font-weight: bold; }
+
+        /* Loader */
+        #loader { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div id="loader"><i class="fa-solid fa-circle-notch fa-spin" style="color:var(--gold); font-size:2rem;"></i></div>
+
+    <div class="page-container">
+        
+        <h2 style="color:#fff; margin-bottom:20px; font-size:1.3rem;">سجل <span style="color:var(--gold);">الفواتير</span></h2>
+
+        <div class="summary-card">
+            <div class="summary-header">
+                <span class="summary-title"><i class="fa-solid fa-chart-pie"></i> ملخص الحساب</span>
+                <i class="fa-solid fa-file-invoice-dollar" style="color:#333; font-size:1.2rem;"></i>
+            </div>
+            <div class="summary-stats">
+                <div class="stat-box">
+                    <span class="stat-val val-total" id="sumTotal">0</span>
+                    <span class="stat-lbl">إجمالي الفواتير</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val val-paid" id="sumPaid">0</span>
+                    <span class="stat-lbl">المدفوع</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val val-due" id="sumDue">0</span>
+                    <span class="stat-lbl">المستحق</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="invoicesList" class="invoices-list">
+            </div>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", loadInvoices);
+
+        async function loadInvoices() {
+            try {
+                // نفترض وجود ملف api/get_invoices.php يجلب الفواتير الخاصة بالعميل
+                const response = await fetch('api/get_invoices.php');
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    const invoices = result.data;
+                    const container = document.getElementById('invoicesList');
+                    
+                    let totalBilled = 0;
+                    let totalPaid = 0;
+                    
+                    container.innerHTML = '';
+
+                    if (invoices.length > 0) {
+                        invoices.forEach(inv => {
+                            // حسابات
+                            const amount = parseFloat(inv.total_amount);
+                            const paid = parseFloat(inv.paid_amount);
+                            const remaining = amount - paid;
+
+                            // تجميع للإجماليات العلوية
+                            totalBilled += amount;
+                            totalPaid += paid;
+
+                            // تحديد الحالة والتنسيق
+                            let statusClass = 'unpaid';
+                            let badgeClass = 'st-unpaid';
+                            let statusText = 'غير مدفوع';
+
+                            if (remaining <= 0) {
+                                statusClass = 'paid'; badgeClass = 'st-paid'; statusText = 'مدفوع بالكامل';
+                            } else if (paid > 0) {
+                                statusClass = 'partially'; badgeClass = 'st-part'; statusText = 'مدفوع جزئياً';
+                            }
+
+                            // HTML الفاتورة
+                            const html = `
+                                <div class="invoice-item ${statusClass}">
+                                    <div class="inv-top">
+                                        <span class="inv-id">#${inv.id}</span>
+                                        <span class="inv-date">${inv.date}</span>
+                                    </div>
+                                    <div class="inv-middle">
+                                        <span class="inv-title">${inv.job_name || 'فاتورة خدمة'}</span>
+                                        <span class="inv-amount">${amount.toLocaleString()}</span>
+                                    </div>
+                                    <div class="inv-bottom">
+                                        <span class="inv-status-badge ${badgeClass}">${statusText}</span>
+                                        <div class="inv-remain">
+                                            متبقي: <span>${remaining.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            container.innerHTML += html;
+                        });
+
+                        // تحديث الكارت العلوي بالأرقام الصحيحة
+                        document.getElementById('sumTotal').innerText = totalBilled.toLocaleString();
+                        document.getElementById('sumPaid').innerText = totalPaid.toLocaleString();
+                        document.getElementById('sumDue').innerText = (totalBilled - totalPaid).toLocaleString();
+
+                    } else {
+                        container.innerHTML = `
+                            <div style="text-align:center; padding:40px; color:#666;">
+                                <i class="fa-regular fa-file-excel" style="font-size:2rem; margin-bottom:10px;"></i>
+                                <p>لا توجد فواتير مسجلة</p>
+                            </div>
+                        `;
+                    }
+                } else {
+                    alert('خطأ: ' + result.message);
+                }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('invoicesList').innerHTML = '<div style="color:#e74c3c; text-align:center;">تعذر تحميل الفواتير</div>';
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

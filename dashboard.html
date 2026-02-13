@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>مركز القيادة | Arab Eagles</title>
+    
+    <link rel="manifest" href="manifest.json">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="js/layout.js"></script>
+
+    <style>
+        /* --- التصميم الملكي الخاص بالداشبورد --- */
+        :root {
+            --glass: rgba(30, 30, 30, 0.6);
+            --border: rgba(255, 255, 255, 0.08);
+            --gold: #d4af37; /* ae-gold */
+            --gold-light: #f1c40f; /* ae-gold-light */
+            --dark-bg: #121212; /* ae-dark */
+            --gold-glow: 0 0 15px rgba(212, 175, 55, 0.15);
+        }
+
+        /* تعريف متغير الزاوية للأنيميشن الحديث */
+        @property --angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        .dashboard-container {
+            padding: 20px;
+            padding-bottom: 100px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        /* 1. قسم الترحيب والحكمة */
+        .welcome-section { margin-bottom: 25px; }
+        .welcome-text { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 5px; }
+        .welcome-sub { color: #888; font-size: 0.9rem; }
+
+        .wisdom-box {
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.1), transparent);
+            border-right: 3px solid var(--gold);
+            padding: 12px 15px;
+            margin-top: 15px;
+            border-radius: 4px;
+            color: #ddd;
+            font-size: 0.85rem;
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        /* 2. أزرار الوصول السريع */
+        .quick-actions-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 30px;
+        }
+        .qa-btn {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 10px;
+            text-align: center;
+            text-decoration: none;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .qa-btn i {
+            font-size: 1.8rem; display: block; margin-bottom: 8px;
+            background: linear-gradient(45deg, var(--gold), #fff);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .qa-btn span { display: block; color: #ccc; font-size: 0.75rem; font-weight: 700; }
+        .qa-btn:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold);
+            box-shadow: var(--gold-glow);
+        }
+        .qa-btn::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, transparent, rgba(212, 175, 55, 0.05));
+            opacity: 0; transition: 0.3s;
+        }
+        .qa-btn:hover::after { opacity: 1; }
+
+        /* 3. البطاقة المالية */
+        .balance-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #000 100%);
+            border-radius: 20px; padding: 25px; position: relative; overflow: hidden;
+            border: 1px solid #333; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .balance-card::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+            animation: rotateGlow 10s linear infinite;
+        }
+        .bc-content { position: relative; z-index: 2; text-align: center; }
+        .bc-label { color: var(--gold); font-size: 0.7rem; letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; }
+        .bc-value { font-size: 2.0rem; font-weight: 600; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .bc-currency { font-size: 0.8rem; color: #666; font-weight: normal; }
+
+        /* 4. إحصائيات الحالة */
+        .stats-row { display: flex; gap: 15px; margin-bottom: 30px; }
+        .stat-box {
+            flex: 1; background: #121212; border-radius: 12px; padding: 15px;
+            border-bottom: 2px solid #333; text-align: center; transition: 0.3s;
+        }
+        .stat-box:hover { border-color: var(--gold); transform: scale(1.02); }
+        .sb-num { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 2px; }
+        .sb-label { font-size: 0.7rem; color: #777; }
+
+        /* 5. قائمة النشاطات */
+        .section-header {
+            display: flex; justify-content: space-between; align-items: flex-end;
+            margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 10px;
+        }
+        .sec-title { font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+        .sec-link { font-size: 0.8rem; color: #666; transition: 0.2s; }
+        .sec-link:hover { color: #fff; }
+
+        .activity-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #151515; padding: 15px; border-radius: 12px;
+            margin-bottom: 10px; border: 1px solid transparent;
+            transition: 0.3s; text-decoration: none;
+        }
+        .activity-item:hover { border-color: #333; background: #1a1a1a; transform: translateX(-5px); }
+        .ai-info h4 { margin: 0 0 5px 0; font-size: 0.95rem; color: #eee; }
+        .ai-meta { font-size: 0.7rem; color: #666; display: flex; gap: 10px; }
+        .ai-status { font-size: 0.7rem; padding: 4px 10px; border-radius: 20px; font-weight: 700; }
+
+        /* حالات الطلب */
+        .st-review { background: rgba(241, 196, 15, 0.1); color: #f1c40f; border: 1px solid rgba(241, 196, 15, 0.2); }
+        .st-active { background: rgba(52, 152, 219, 0.1); color: #3498db; border: 1px solid rgba(52, 152, 219, 0.2); }
+        .st-done { background: rgba(46, 204, 113, 0.1); color: #2ecc71; border: 1px solid rgba(46, 204, 113, 0.2); }
+
+        /* =========================================
+           تعديل تصميم زر المراجعة (الذهب السائل والمدار)
+           ========================================= */
+        .review-alert {
+            background: linear-gradient(45deg, #2c2509, #1a1a1a);
+            border: 1px solid var(--gold);
+            padding: 15px; border-radius: 12px;
+            display: none; align-items: center; justify-content: space-between;
+            margin-bottom: 25px; 
+        }
+
+        .ra-btn {
+            position: relative;
+            background: linear-gradient(90deg, var(--gold), #b8860b, var(--gold-light), var(--gold));
+            background-size: 300% 100%;
+            color: #000;
+            padding: 8px 25px;
+            border-radius: 6px; 
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-decoration: none;
+            z-index: 1;
+            overflow: visible;
+            animation: liquidGold 3s linear infinite;
+            border: none;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .ra-btn::before {
+            content: ''; position: absolute; z-index: -1;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            border-radius: 8px; background: #1a1a1a;
+            background-image: conic-gradient(from var(--angle), transparent 0%, transparent 70%, var(--gold) 85%, var(--gold-light) 95%, transparent 100%);
+            animation: rotateOrbit 4s linear infinite;
+        }
+
+        @keyframes rotateOrbit { to { --angle: 360deg; } }
+        @keyframes liquidGold { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+        .ra-btn:hover::before { filter: drop-shadow(0 0 8px var(--gold)); animation-duration: 2s; }
+        @keyframes rotateGlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ========================================================
+           ✨ إشعار التثبيت الذكي (PWA Smart Toast) - تصميم جديد
+           ======================================================== */
+        .pwa-toast {
+            position: fixed;
+            top: 20px; /* يظهر من الأعلى */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid var(--gold);
+            border-radius: 50px; /* شكل كبسولة أنيق */
+            padding: 10px 20px;
+            display: none; /* مخفي افتراضياً */
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            z-index: 99999;
+            animation: slideDownToast 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        .pwa-content { display: flex; align-items: center; gap: 12px; }
+        .pwa-icon-img { width: 35px; height: 35px; border-radius: 50%; border: 1px solid var(--gold); object-fit: cover; }
+        .pwa-text { color: #fff; font-size: 0.8rem; line-height: 1.2; }
+        .pwa-text strong { color: var(--gold); display: block; font-size: 0.85rem; }
+        
+        .pwa-action-btn {
+            background: var(--gold); color: #000;
+            border: none; padding: 8px 15px;
+            border-radius: 20px; font-weight: bold;
+            font-size: 0.75rem; cursor: pointer;
+            white-space: nowrap; transition: 0.3s;
+        }
+        .pwa-action-btn:hover { background: #fff; box-shadow: 0 0 10px #fff; }
+        
+        .pwa-close {
+            position: absolute; top: -5px; right: -5px;
+            background: var(--gold); color: #000;
+            width: 20px; height: 20px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; cursor: pointer; border: 2px solid #000;
+        }
+
+        /* تعليمات الآيفون الخاصة */
+        .ios-tooltip {
+            position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%);
+            background: #1a1a1a; padding: 15px; border-radius: 12px;
+            border: 1px solid var(--gold); text-align: center;
+            width: 85%; max-width: 300px; display: none; z-index: 99999;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        }
+        .ios-tooltip::after {
+            content: ''; position: absolute; bottom: -10px; left: 50%;
+            border-width: 10px 10px 0; border-style: solid;
+            border-color: var(--gold) transparent transparent; transform: translateX(-50%);
+        }
+
+        @keyframes slideDownToast { from { top: -100px; opacity: 0; } to { top: 20px; opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="app-header"></div>
+
+    <div class="dashboard-container">
+        
+        <div class="welcome-section">
+            <div class="welcome-text">أهلاً بك، <span id="dash_u_name" style="color:var(--gold)">...</span></div>
+            <div class="welcome-sub">نتمنى لك يوماً مثمراً ومليئاً بالإنجازات</div>
+            <div class="wisdom-box">
+                <i class="fa-solid fa-lightbulb" style="color:var(--gold)"></i>
+                <span id="wisdomText">جاري تحميل إشراقة اليوم...</span>
+            </div>
+        </div>
+
+        <div id="reviewAlert" class="review-alert">
+            <div>
+                <div style="color:var(--gold); font-weight:bold; font-size:0.9rem;">⚠️ إجراء مطلوب</div>
+                <div style="font-size:0.8rem; color:#ccc;" id="reviewJobName">هناك تصميم بانتظار موافقتك</div>
+            </div>
+            <a href="#" id="reviewLink" class="ra-btn">معاينة</a>
+        </div>
+
+        <div class="quick-actions-grid">
+            <a href="new_order.html?type=order" class="qa-btn">
+                <i class="fa-solid fa-rocket"></i> <span>أمر تشغيل</span>
+            </a>
+            <a href="new_order.html?type=quote" class="qa-btn">
+                <i class="fa-solid fa-file-contract"></i> <span>طلب عرض</span>
+            </a>
+            <a href="invoices.html" class="qa-btn">
+                <i class="fa-solid fa-file-invoice-dollar"></i> <span>فواتيري</span>
+            </a>
+        </div>
+
+        <div class="balance-card">
+            <div class="bc-content">
+                <div class="bc-label">الرصيد المستحق</div>
+                <div class="bc-value">
+                    <span id="u_balance">0.00</span> <span class="bc-currency">EGP</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-row">
+            <a href="orders.html" class="stat-box">
+                <div id="s_active" class="sb-num" style="color:#f1c40f">0</div>
+                <div class="sb-label">قيد التنفيذ</div>
+            </a>
+            <a href="quotes.html" class="stat-box">
+                <div id="s_quotes" class="sb-num" style="color:#3498db">0</div>
+                <div class="sb-label">عروض سارية</div>
+            </a>
+            <a href="invoices.html" class="stat-box">
+                <div id="s_invoices" class="sb-num" style="color:#e74c3c">0</div>
+                <div class="sb-label">فواتير</div>
+            </a>
+        </div>
+
+        <div class="section-header">
+            <div class="sec-title"><i class="fa-solid fa-clock-rotate-left"></i> آخر التحركات</div>
+            <a href="orders.html" class="sec-link">الأرشيف الكامل &larr;</a>
+        </div>
+        <div id="recentList">
+            <div style="text-align:center; padding:40px; color:#444;">
+                <i class="fa-solid fa-circle-notch fa-spin fa-2x"></i>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="pwaToast" class="pwa-toast">
+        <div class="pwa-close" onclick="dismissPwa()">×</div>
+        <div class="pwa-content">
+            <img src="assets/images/icon.png" class="pwa-icon-img" alt="App">
+            <div class="pwa-text">
+                <strong>تطبيق Arab Eagles</strong>
+                <span>تجربة أسرع وإشعارات فورية</span>
+            </div>
+        </div>
+        <button id="pwaInstallAction" class="pwa-action-btn">تثبيت</button>
+    </div>
+
+    <div id="iosTooltip" class="ios-tooltip">
+        <p style="color:#fff; margin:0 0 10px; font-size:0.9rem;">لتثبيت التطبيق على الآيفون:</p>
+        <p style="color:#ccc; font-size:0.8rem; margin:0;">
+            1. اضغط على زر <strong>مشاركة</strong> <i class="fa-solid fa-share-from-square"></i> بالأسفل<br>
+            2. اختر <strong>إضافة إلى الشاشة الرئيسية</strong> <i class="fa-regular fa-square-plus"></i>
+        </p>
+        <button onclick="document.getElementById('iosTooltip').style.display='none'" style="margin-top:10px; background:transparent; border:1px solid #555; color:#aaa; padding:5px 15px; border-radius:15px;">حسناً</button>
+    </div>
+
+    <script>
+        const wisdoms = [
+            "الجودة ليست عملاً، بل هي عادة.",
+            "التخطيط الجيد هو نصف الطريق نحو النجاح.",
+            "التفاصيل الصغيرة تصنع الفارق الكبير في عالم الأعمال.",
+            "النجاح هو مجموع مجهودات صغيرة تتكرر كل يوم.",
+            "الابتكار هو ما يميز القائد عن التابع.",
+            "الوقت هو رأس المال الحقيقي لأي مشروع ناجح."
+        ];
+
+        async function initDashboard() {
+            document.getElementById('wisdomText').innerText = wisdoms[Math.floor(Math.random() * wisdoms.length)];
+
+            try {
+                const response = await fetch('api/dashboard_data.php?t=' + new Date().getTime());
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    const data = result.data;
+                    const nameEl = document.getElementById('dash_u_name');
+                    if(nameEl) nameEl.innerText = data.name.split(' ')[0];
+
+                    document.getElementById('u_balance').innerText = Number(data.balance).toLocaleString();
+                    document.getElementById('s_active').innerText = data.active_orders || 0;
+                    document.getElementById('s_quotes').innerText = data.pending_quotes || 0;
+                    document.getElementById('s_invoices').innerText = data.invoices_count || 0;
+
+                    if (data.pending_review) {
+                        document.getElementById('reviewJobName').innerText = `تصميم "${data.pending_review.job_name}" جاهز للمراجعة`;
+                        let cleanUrl = data.pending_review.url.replace(/([^:])\/\//g, "$1/");
+                        document.getElementById('reviewLink').href = cleanUrl;
+                        document.getElementById('reviewAlert').style.display = 'flex';
+                    }
+
+                    const list = document.getElementById('recentList');
+                    if (data.recent_orders && data.recent_orders.length > 0) {
+                        let html = '';
+                        data.recent_orders.forEach(job => {
+                            let stClass = 'st-active'; let stText = 'قيد العمل';
+                            if(job.status === 'pending') { stClass = 'st-active'; stText = 'قيد المراجعة'; }
+                            else if(job.status === 'client_rev') { stClass = 'st-review'; stText = 'بانتظار موافقتك'; }
+                            else if(job.status === 'completed') { stClass = 'st-done'; stText = 'مكتمل'; }
+                            else if(job.status === 'processing') { stClass = 'st-active'; stText = 'جاري التنفيذ'; }
+
+                            html += `
+                                <a href="orders.html" class="activity-item">
+                                    <div class="ai-info">
+                                        <h4>${job.job_name}</h4>
+                                        <div class="ai-meta">
+                                            <span><i class="fa-solid fa-hashtag"></i> ${job.id}</span>
+                                            <span><i class="fa-regular fa-clock"></i> ${job.created_at.split(' ')[0]}</span>
+                                        </div>
+                                    </div>
+                                    <div class="ai-status ${stClass}">${stText}</div>
+                                </a>`;
+                        });
+                        list.innerHTML = html;
+                    } else {
+                        list.innerHTML = `
+                            <div style="text-align:center; padding:30px; border:1px dashed #333; border-radius:10px;">
+                                <i class="fa-regular fa-folder-open" style="font-size:2rem; color:#333; margin-bottom:10px;"></i>
+                                <div style="color:#666; font-size:0.9rem;">لا توجد نشاطات حديثة</div>
+                                <a href="new_order.html" style="color:var(--gold); font-size:0.8rem; margin-top:5px; display:block;">ابدأ أول طلب الآن</a>
+                            </div>`;
+                    }
+                }
+            } catch(e) { console.error(e); }
+        }
+        
+        document.addEventListener("DOMContentLoaded", initDashboard);
+
+        // ==============================================
+        // ✨ JS: منطق التثبيت الذكي (Smart PWA Logic)
+        // ==============================================
+        let deferredPrompt;
+        const pwaToast = document.getElementById('pwaToast');
+        const pwaBtn = document.getElementById('pwaInstallAction');
+        const iosTooltip = document.getElementById('iosTooltip');
+
+        // التحقق مما إذا كان التطبيق مثبتاً بالفعل
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+        const isDismissed = sessionStorage.getItem('pwa_toast_dismissed');
+
+        // 1. منطق الأندرويد والكمبيوتر
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // إظهار الإشعار فقط إذا لم يتم تجاهله ولم يكن مثبتاً
+            if (!isStandalone && !isDismissed) {
+                pwaToast.style.display = 'flex';
+            }
+        });
+
+        pwaBtn.addEventListener('click', () => {
+            // فحص الآيفون
+            const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+
+            if (isIos) {
+                // إظهار تعليمات الآيفون
+                pwaToast.style.display = 'none';
+                iosTooltip.style.display = 'block';
+            } else if (deferredPrompt) {
+                // تثبيت أندرويد/PC
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        pwaToast.style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                });
+            }
+        });
+
+        // 2. منطق الآيفون (لأنه لا يدعم beforeinstallprompt)
+        const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+        if (isIos && !isStandalone && !isDismissed) {
+            pwaToast.style.display = 'flex';
+            pwaBtn.innerText = "تثبيت"; // الزر سيفتح التوليب
+        }
+
+        // إخفاء الإشعار
+        function dismissPwa() {
+            pwaToast.style.display = 'none';
+            sessionStorage.setItem('pwa_toast_dismissed', 'true');
+        }
+    </script>
+</body>
+</html>
